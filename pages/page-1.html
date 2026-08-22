@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Household Support Application — Step 1 of 4: Your details</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to form</a>
+
+<header class="hdr">
+  <p class="org">Calder County — Department of Household Services</p>
+</header>
+
+<div class="wrap">
+  <p class="step">Step 1 of 4 — Your details</p>
+
+  <p class="save-status" id="saveStatus" role="status" aria-live="polite">
+    Your answers are saved automatically on this device as you go.
+  </p>
+
+  <main id="main">
+    <form id="page1Form" novalidate>
+
+      <div class="q">
+        <label for="surname">Surname <span class="req" aria-hidden="true">*</span></label>
+        <input type="text" id="surname" name="surname" aria-required="true" autocomplete="family-name">
+      </div>
+
+      <div class="q">
+        <label for="forenames">First name(s) <span class="req" aria-hidden="true">*</span></label>
+        <input type="text" id="forenames" name="forenames" aria-required="true" autocomplete="given-name">
+      </div>
+
+      <div class="q">
+        <label for="aka">Other names you've used before (optional)</label>
+        <p class="hint" id="aka_hint">For example, a maiden name or a previous legal name.</p>
+        <input type="text" id="aka" name="aka" aria-describedby="aka_hint">
+      </div>
+
+      <div class="q">
+        <label for="dob">Date of birth <span class="req" aria-hidden="true">*</span></label>
+        <input type="date" id="dob" name="dob" aria-required="true" autocomplete="bday">
+      </div>
+
+      <div class="q">
+        <label for="client_id">Department reference number (optional)</label>
+        <p class="hint" id="client_id_hint">
+          Only if you've applied to this office before and have a reference number.
+          Most first-time applicants don't have one — leave this blank.
+        </p>
+        <input type="text" id="client_id" name="client_id" aria-describedby="client_id_hint">
+      </div>
+
+      <div class="q">
+        <label for="ssn">Social Security number <span class="req" aria-hidden="true">*</span></label>
+        <input type="text" id="ssn" name="ssn" aria-required="true" autocomplete="off">
+      </div>
+
+      <fieldset class="q">
+        <legend>Sex as recorded on your ID document <span class="req" aria-hidden="true">*</span></legend>
+        <label class="radio-label"><input type="radio" name="sex" value="M" aria-required="true"> Male</label>
+        <label class="radio-label"><input type="radio" name="sex" value="F"> Female</label>
+        <label class="radio-label"><input type="radio" name="sex" value="X"> X</label>
+        <label class="radio-label"><input type="radio" name="sex" value="Prefer not to say"> Prefer not to say</label>
+      </fieldset>
+
+      <div class="q">
+        <label for="phone">Phone number (optional)</label>
+        <input type="tel" id="phone" name="phone" autocomplete="tel">
+      </div>
+
+      <div class="q">
+        <label for="email">Email address (optional)</label>
+        <input type="email" id="email" name="email" autocomplete="email">
+      </div>
+
+      <fieldset class="q">
+        <legend>How would you like us to contact you?</legend>
+        <label class="radio-label"><input type="radio" name="contact_pref" value="Post"> Post</label>
+        <label class="radio-label"><input type="radio" name="contact_pref" value="Telephone"> Phone</label>
+        <label class="radio-label"><input type="radio" name="contact_pref" value="Email"> Email</label>
+        <label class="radio-label"><input type="radio" name="contact_pref" value="SMS"> Text message</label>
+      </fieldset>
+
+      <div class="q">
+        <label for="lang">Preferred language for letters from us (optional)</label>
+        <input type="text" id="lang" name="lang">
+      </div>
+
+      <div class="nav">
+        <button type="submit" class="btn btn-primary">Continue</button>
+      </div>
+    </form>
+  </main>
+
+  <hr>
+  <p class="hint">Form HSP-1. Fields marked <span class="req" aria-hidden="true">*</span> are required.</p>
+</div>
+
+<script src="../storage.js"></script>
+<script>
+  autoSavePage("page-1");
+
+  document.getElementById("page1Form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    // Minimal required-field check for now — full accessible error handling
+    // (focus move + linked messages) comes with the household/income pages.
+    const required = ["surname", "forenames", "dob", "ssn", "sex"];
+    const missing = required.filter((name) => {
+      const field = document.querySelector(`[name="${name}"]`);
+      if (field.type === "radio") {
+        return !document.querySelector(`[name="${name}"]:checked`);
+      }
+      return !field.value;
+    });
+    if (missing.length === 0) {
+      window.location.href = "page-3.html";
+    }
+  });
+</script>
+</body>
+</html>
