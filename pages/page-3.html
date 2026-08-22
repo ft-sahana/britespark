@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Household Support Application — Step 2 of 4: Who lives with you</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to form</a>
+
+<header class="hdr">
+  <p class="org">Calder County — Department of Household Services</p>
+</header>
+
+<div class="wrap">
+  <p class="step">Step 2 of 4 — Who lives with you</p>
+
+  <p class="save-status" id="saveStatus" role="status" aria-live="polite">
+    Your answers are saved automatically on this device as you go.
+  </p>
+
+  <!-- Error summary: hidden until there are errors, then gets focus so a
+       screen reader announces it immediately, and links jump straight to
+       the broken field. This replaces the original's disconnected banner. -->
+  <div id="errorSummary" class="err" tabindex="-1" role="alert" hidden>
+    <p class="err-title">There's a problem</p>
+    <ul id="errorList"></ul>
+  </div>
+
+  <main id="main">
+    <form id="page3Form" novalidate>
+
+      <div class="q">
+        <label id="hh_intro">Who else lives with you?</label>
+        <p class="hint">
+          Include anyone who shares your home and day-to-day living
+          arrangements — family, partner, or anyone else. You don't need to
+          include a lodger who has their own separate tenancy agreement.
+        </p>
+      </div>
+
+      <div id="personList"></div>
+
+      <button type="button" id="addPerson" class="btn btn-secondary">
+        + Add another person
+      </button>
+      <p class="hint">You can add up to 6 people. If more than 6 people live with you, contact your district office instead of continuing here.</p>
+
+      <fieldset class="q">
+        <legend>Has anyone moved into or out of your household in the last 12 months?</legend>
+        <label class="radio-label"><input type="radio" name="hh_change" value="Yes"> Yes</label>
+        <label class="radio-label"><input type="radio" name="hh_change" value="No"> No</label>
+      </fieldset>
+
+      <div class="q">
+        <label for="hh_change_detail">If yes, who and when (optional unless you answered yes above)</label>
+        <input type="text" id="hh_change_detail" name="hh_change_detail">
+      </div>
+
+      <fieldset class="q">
+        <legend>Does anyone listed above have a condition on their immigration status that limits access to public assistance?</legend>
+        <p class="hint">If you're not sure, choose "Don't know" — this won't delay your application, we'll follow up if needed.</p>
+        <label class="radio-label"><input type="radio" name="nrpf" value="Yes"> Yes</label>
+        <label class="radio-label"><input type="radio" name="nrpf" value="No"> No</label>
+        <label class="radio-label"><input type="radio" name="nrpf" value="Do not know"> Don't know</label>
+      </fieldset>
+
+      <div class="nav">
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='page-1.html'">Back</button>
+        <button type="submit" class="btn btn-primary">Continue</button>
+      </div>
+    </form>
+  </main>
+
+  <hr>
+  <p class="hint">Form HSP-1. Fields marked <span class="req" aria-hidden="true">*</span> are required.</p>
+</div>
+
+<script src="../storage.js"></script>
+<script>
+  const MAX_PEOPLE = 6;
+  const personList = document.getElementById("personList");
+  let personCount = 0;
+
+  function personCardHTML(n) {
+    return `
+      <fieldset class="person-card" data-person="${n}">
+        <legend>Person ${n}</legend>
+
+        <div class="q">
+          <label for="hh${n}_name">Full name <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="hh${n}_name" name="hh${n}_name" aria-required="true">
+        </div>
+
+        <div class="q">
+          <label for="hh${n}_dob">Date of birth <span class="req" aria-hidden="true">*</span></label>
+          <input type="date" id="hh${n}_dob" name="hh${n}_dob" aria-required="true">
+        </div>
+
+        <div class="q">
+          <label for="hh${n}_rel">Relationship to you <span class="req" aria-hidden="true">*</span></label>
+          <select id="hh${n}_rel" name="hh${n}_rel" aria-required="true">
+            <option value="">Choose one</option>
+            <option>Spouse/partner</option>
+            <option>Son/daughter</option>
+            <option>Parent</option>
+            <option>Sibling</option>
+            <option>Other relative</option>
+            <option>Non-relative</option>
+          </select>
+        </div>
+
+        <div class="q">
+          <label for="hh${n}_income">Their monthly income, if any (optional)</label>
+          <input type="text" id="hh${n}_income" name="hh${n}_income" inputmode="decimal">
+        </div>
+
+        <fieldset class="q">
+          <legend>Does this apply to Person ${n}?</legend>
+          <label class="checkbox-label">
+            <input type="checkbox" name="hh${n}_dep" value="y">
+            They are financially dependent on you
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" name="hh${n}_abs" value="y">
+            They are temporarily away from home right now
+          </label>
+        </fieldset>
+
+        <button type="button" class="btn btn-remove" data-remove="${n}">Remove this person</button>
+      </fieldset>
+    `;
+  }
+
+  function addPerson() {
+    if (personCount >= MAX_PEOPLE) return;
+    personCount++;
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = personCardHTML(personCount);
+    personList.appendChild(wrapper.firstElementChild);
+    document.getElementById("addPerson").disabled = personCount >= MAX_PEOPLE;
+  }
+
+  document.getElementById("addPerson").addEventListener("click", addPerson);
+
+  personList.addEventListener("click", (e) => {
+    if (e.target.matches("[data-remove]")) {
+      e.target.closest(".person-card").remove();
+      document.getElementById("addPerson").disabled = false;
+    }
+  });
+
+  // Start with one person card visible, since the common case is "at least one other person"
+  addPerson();
+
+  // Restore save/resume after the dynamic person cards exist
+  autoSavePage("page-3");
+
+  document.getElementById("page3Form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const errors = [];
+    const summary = document.getElementById("errorSummary");
+    const list = document.getElementById("errorList");
+    list.innerHTML = "";
+
+    document.querySelectorAll(".person-card").forEach((card) => {
+      const n = card.dataset.person;
+      const name = card.querySelector(`[name="hh${n}_name"]`);
+      const dob = card.querySelector(`[name="hh${n}_dob"]`);
+      const rel = card.querySelector(`[name="hh${n}_rel"]`);
+      if (!name.value) errors.push({ id: name.id, msg: `Person ${n}: enter their full name` });
+      if (!dob.value) errors.push({ id: dob.id, msg: `Person ${n}: enter their date of birth` });
+      if (!rel.value) errors.push({ id: rel.id, msg: `Person ${n}: choose a relationship` });
+    });
+
+    if (!document.querySelector('[name="hh_change"]:checked')) {
+      errors.push({ id: null, msg: "Answer whether anyone has moved in or out in the last 12 months" });
+    }
+
+    if (errors.length > 0) {
+      errors.forEach((err) => {
+        const li = document.createElement("li");
+        if (err.id) {
+          const a = document.createElement("a");
+          a.href = `#${err.id}`;
+          a.textContent = err.msg;
+          a.addEventListener("click", (evt) => {
+            evt.preventDefault();
+            const field = document.getElementById(err.id);
+            field.focus();
+          });
+          li.appendChild(a);
+        } else {
+          li.textContent = err.msg;
+        }
+        list.appendChild(li);
+      });
+      summary.hidden = false;
+      summary.focus();
+    } else {
+      summary.hidden = true;
+      window.location.href = "page-4.html";
+    }
+  });
+</script>
+</body>
+</html>
