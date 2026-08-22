@@ -1,3 +1,87 @@
 <input name="test_field" placeholder="type something">
 <script src="storage.js"></script>
 <script>autoSavePage("test-page");</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Household Support Application — Before you start</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="hdr">
+  <p class="org">Calder County — Department of Household Services</p>
+</header>
+
+<div class="wrap">
+  <main id="main">
+    <h1 style="font-size:22px;margin:16px 0 8px;">Apply for Household Support</h1>
+    <p class="hint" style="font-size:15px;">
+      This application has 4 short sections. You can save your progress
+      and come back later — nothing is lost if you close the page.
+    </p>
+
+    <div id="resumeBanner" class="save-status" hidden>
+      <p style="margin:0 0 8px;">You have an application in progress.</p>
+      <button type="button" id="resumeBtn" class="btn btn-primary">Continue where you left off</button>
+      <button type="button" id="startOverBtn" class="btn btn-secondary">Start over instead</button>
+    </div>
+
+    <section class="q">
+      <h2 style="font-size:17px;">What you'll be asked about</h2>
+      <ol style="padding-left:22px; line-height:1.9;">
+        <li>Your details — name, date of birth, contact information</li>
+        <li>Who lives with you</li>
+        <li>Income</li>
+        <li>Savings and property</li>
+      </ol>
+    </section>
+
+    <section class="q">
+      <h2 style="font-size:17px;">What to have ready</h2>
+      <p class="hint" style="font-size:15px;">You don't need everything to start — you can save and come back for anything you're missing.</p>
+      <ul style="padding-left:22px; line-height:1.9;">
+        <li>Your Social Security number</li>
+        <li>Recent payslips or proof of any income</li>
+        <li>Bank statements or savings account balances</li>
+        <li>Dates of birth for anyone living with you</li>
+      </ul>
+    </section>
+
+    <div class="nav">
+      <button type="button" id="startBtn" class="btn btn-primary">Start application</button>
+    </div>
+  </main>
+</div>
+
+<script src="storage.js"></script>
+<script>
+  // If there's saved progress, offer to resume rather than silently
+  // starting fresh — this is the point of save/resume actually paying off.
+  const existing = loadApplication();
+  const hasProgress = Object.keys(existing).some((k) => k !== "lastSaved" && Object.keys(existing[k]).length > 0);
+
+  if (hasProgress) {
+    document.getElementById("resumeBanner").hidden = false;
+  }
+
+  document.getElementById("resumeBtn").addEventListener("click", () => {
+    window.location.href = "pages/page-1.html";
+  });
+
+  document.getElementById("startOverBtn").addEventListener("click", () => {
+    if (confirm("This will clear everything you've entered so far. Continue?")) {
+      clearAll();
+      window.location.href = "pages/page-1.html";
+    }
+  });
+
+  document.getElementById("startBtn").addEventListener("click", () => {
+    window.location.href = "pages/page-1.html";
+  });
+</script>
+</body>
+</html>
