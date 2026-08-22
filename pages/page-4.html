@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Household Support Application — Step 3 of 4: Income</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to form</a>
+
+<header class="hdr">
+  <p class="org">Calder County — Department of Household Services</p>
+</header>
+
+<div class="wrap">
+  <p class="step">Step 3 of 4 — Income</p>
+
+  <p class="save-status" id="saveStatus" role="status" aria-live="polite">
+    Your answers are saved automatically on this device as you go.
+  </p>
+
+  <div id="errorSummary" class="err" tabindex="-1" role="alert" hidden>
+    <p class="err-title">There's a problem</p>
+    <ul id="errorList"></ul>
+  </div>
+
+  <main id="main">
+    <form id="page4Form" novalidate>
+
+      <div class="q">
+        <p class="hint">
+          Tell us about money coming into your household, before tax is
+          taken off. If something doesn't apply to you, leave it blank.
+        </p>
+      </div>
+
+      <div class="q">
+        <label for="earn">Wages from a job <span class="req" aria-hidden="true">*</span></label>
+        <p class="hint" id="earn_hint">Before tax and National Insurance are taken off — the amount on your payslip before deductions.</p>
+        <input type="text" id="earn" name="earn" inputmode="decimal" aria-required="true" aria-describedby="earn_hint">
+      </div>
+
+      <div class="q">
+        <label for="earn_freq">How often you're paid that amount <span class="req" aria-hidden="true">*</span></label>
+        <select id="earn_freq" name="earn_freq" aria-required="true">
+          <option value="">Choose one</option>
+          <option>Weekly</option>
+          <option>Fortnightly</option>
+          <option>Every 4 weeks</option>
+          <option>Monthly</option>
+          <option>Annually</option>
+        </select>
+      </div>
+
+      <div class="q">
+        <label for="se_profit">Self-employment profit (optional)</label>
+        <p class="hint" id="se_hint">Your income after business expenses, before tax.</p>
+        <input type="text" id="se_profit" name="se_profit" inputmode="decimal" aria-describedby="se_hint">
+      </div>
+
+      <div class="q">
+        <label for="pension">Pension or annuity payments (optional)</label>
+        <input type="text" id="pension" name="pension" inputmode="decimal">
+      </div>
+
+      <div class="q">
+        <label for="maint_adult">Maintenance payments you receive for yourself (optional)</label>
+        <input type="text" id="maint_adult" name="maint_adult" inputmode="decimal">
+      </div>
+
+      <div class="q">
+        <label for="maint_child">Maintenance payments you receive for a child (optional)</label>
+        <input type="text" id="maint_child" name="maint_child" inputmode="decimal">
+      </div>
+
+      <div class="q">
+        <label for="rent_in">Rental income (optional)</label>
+        <p class="hint" id="rent_hint">After costs like mortgage interest, letting fees, or repairs.</p>
+        <input type="text" id="rent_in" name="rent_in" inputmode="decimal" aria-describedby="rent_hint">
+      </div>
+
+      <div class="q">
+        <label for="other_prog">Payments from other government programs (optional)</label>
+        <input type="text" id="other_prog" name="other_prog" inputmode="decimal">
+      </div>
+
+      <div class="q">
+        <label for="training">Training allowance (optional)</label>
+        <input type="text" id="training" name="training" inputmode="decimal">
+      </div>
+
+      <div class="q">
+        <label for="care">Care allowance (optional)</label>
+        <input type="text" id="care" name="care" inputmode="decimal">
+      </div>
+
+      <div class="q">
+        <label for="other_income">Any other income not listed above (optional)</label>
+        <input type="text" id="other_income" name="other_income" inputmode="decimal">
+      </div>
+
+      <fieldset class="q">
+        <legend>Has any of this income changed in the last 3 months?</legend>
+        <label class="radio-label"><input type="radio" name="inc_change" value="Yes"> Yes</label>
+        <label class="radio-label"><input type="radio" name="inc_change" value="No"> No</label>
+      </fieldset>
+
+      <div class="q">
+        <label for="inc_change_detail">If yes, what changed (optional unless you answered yes above)</label>
+        <input type="text" id="inc_change_detail" name="inc_change_detail">
+      </div>
+
+      <div class="nav">
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='page-3.html'">Back</button>
+        <button type="submit" class="btn btn-primary">Continue</button>
+      </div>
+    </form>
+  </main>
+
+  <hr>
+  <p class="hint">Form HSP-1. Fields marked <span class="req" aria-hidden="true">*</span> are required.</p>
+</div>
+
+<script src="../storage.js"></script>
+<script>
+  autoSavePage("page-4");
+
+  document.getElementById("page4Form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const errors = [];
+    const summary = document.getElementById("errorSummary");
+    const list = document.getElementById("errorList");
+    list.innerHTML = "";
+
+    const earn = document.getElementById("earn");
+    const earnFreq = document.getElementById("earn_freq");
+    if (!earn.value) errors.push({ id: "earn", msg: "Enter your wages from a job, or leave 0 if none" });
+    if (!earnFreq.value) errors.push({ id: "earn_freq", msg: "Choose how often you're paid" });
+    if (!document.querySelector('[name="inc_change"]:checked')) {
+      errors.push({ id: null, msg: "Answer whether your income has changed in the last 3 months" });
+    }
+
+    if (errors.length > 0) {
+      errors.forEach((err) => {
+        const li = document.createElement("li");
+        if (err.id) {
+          const a = document.createElement("a");
+          a.href = `#${err.id}`;
+          a.textContent = err.msg;
+          a.addEventListener("click", (evt) => {
+            evt.preventDefault();
+            document.getElementById(err.id).focus();
+          });
+          li.appendChild(a);
+        } else {
+          li.textContent = err.msg;
+        }
+        list.appendChild(li);
+      });
+      summary.hidden = false;
+      summary.focus();
+    } else {
+      summary.hidden = true;
+      window.location.href = "page-5.html";
+    }
+  });
+</script>
+</body>
+</html>
