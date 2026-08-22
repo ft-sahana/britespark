@@ -1,220 +1,363 @@
 /* styles.css
-   Shared styling for the HSP-1 rebuild.
-   Mobile-first: Denise is on a phone, so base styles target a small
-   screen and widen up from there. Accessibility notes are inline. */
+   Palette: #000000 (black), #2366B5 / #3E56D3 (blues), #FF2929 (red),
+   #FFA89F (coral), #FFFFFF (white). Font: Poppins.
 
+   Contrast note: #FF2929 and #FFA89F both fail WCAG AA with white text
+   at body size (~3.6-3.75:1, need 4.5:1) — measured against the actual
+   hex values. They're used only for borders, badges, and the header
+   accent stripe, never as a background carrying white text. Error
+   text/icons use a darker red, #B42318 (6.58:1 against white), same
+   hue family, safe for text. */
+
+   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+   :root {
+     --black: #000000;
+     --blue: #2366b5;
+     --blue-deep: #3e56d3;
+     --red: #ff2929;
+     --red-text: #b42318;
+     --coral: #ffa89f;
+     --white: #ffffff;
+     --text-primary: #101828;
+     --text-secondary: #475467;
+     --success: #4b5320;   /* dark olive — fits the palette's saturated tones, 8.24:1 vs. white, well past AA */
+     --radius-md: 12px;
+     --radius-lg: 18px;
+     --shadow-md: 0 8px 24px rgba(16, 24, 40, 0.18);
+     --transition-fast: 150ms ease;
+   }
+   
    * {
-    box-sizing: border-box;
-  }
-  
-  body {
-    font-family: -apple-system, "Segoe UI", Arial, Helvetica, sans-serif;
-    font-size: 16px;          /* never below 16px — prevents mobile Safari auto-zoom on focus */
-    line-height: 1.5;
-    color: #1a1a1a;
-    background: #fafafa;
-    margin: 0;
-  }
-  
-  /* Skip link: invisible until focused, lets keyboard/screen reader users
-     jump straight past the header to the form on every page. */
-  .skip-link {
-    position: absolute;
-    left: -999px;
-    top: 0;
-    background: #1a3c8e;
-    color: #fff;
-    padding: 10px 16px;
-    z-index: 100;
-  }
-  .skip-link:focus {
-    left: 8px;
-    top: 8px;
-  }
-  
-  .hdr {
-    background: #1a3c8e;
-    color: #fff;
-    padding: 14px 16px;
-  }
-  .hdr .org {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-  }
-  
-  .wrap {
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 16px;
-  }
-  
-  .step {
-    color: #555;
-    font-size: 14px;
-    margin: 12px 0 4px;
-    font-weight: 600;
-  }
-  
-  .save-status {
-    background: #eef4ea;
-    border: 1px solid #cfe3c6;
-    color: #2f5c22;
-    font-size: 14px;
-    padding: 8px 12px;
-    border-radius: 4px;
-    margin-bottom: 16px;
-  }
-  
-  /* Error summary: visually distinct, and gets keyboard focus via
-     tabindex="-1" + .focus() in JS so screen readers announce it
-     immediately on submit. */
-  .err {
-    border: 2px solid #b3261e;
-    background: #fdf0f0;
-    color: #7a1712;
-    padding: 12px 16px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-  }
-  .err-title {
-    font-weight: 700;
-    margin: 0 0 8px;
-  }
-  .err ul {
-    margin: 0;
-    padding-left: 20px;
-  }
-  .err a {
-    color: #7a1712;
-    text-decoration: underline;
-  }
-  
-  .q {
-    margin: 20px 0;
-  }
-  
-  label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-  
-  .hint {
-    color: #555;
-    font-size: 14px;
-    margin: 4px 0 8px;
-  }
-  
-  .req {
-    color: #b3261e;
-  }
-  
-  input[type="text"],
-  input[type="date"],
-  input[type="email"],
-  input[type="tel"],
-  input[type="number"],
-  select {
-    width: 100%;
-    max-width: 100%;
-    font-size: 16px;
-    padding: 10px 12px;
-    border: 1px solid #767676;   /* darker than a typical grey border for 3:1 contrast */
-    border-radius: 4px;
-    background: #fff;
-    color: #1a1a1a;
-  }
-  
-  /* Visible focus ring on every interactive element — never remove this. */
-  input:focus,
-  select:focus,
-  button:focus,
-  a:focus {
-    outline: 3px solid #1a3c8e;
-    outline-offset: 2px;
-  }
-  
-  fieldset {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 12px 16px 16px;
-    margin: 20px 0 20px 0;
-  }
-  fieldset.person-card {
-    border: 2px solid #1a3c8e;
-    background: #f4f6fb;
-  }
-  legend {
-    font-weight: 600;
-    padding: 0 6px;
-  }
-  
-  .radio-label,
-  .checkbox-label {
-    display: block;
-    font-weight: 400;
-    margin: 8px 0;
-    min-height: 44px;     /* comfortable tap target for mobile */
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .radio-label input,
-  .checkbox-label input {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-  }
-  
-  .nav {
-    display: flex;
-    gap: 12px;
-    margin-top: 28px;
-    flex-wrap: wrap;
-  }
-  
-  .btn {
-    font-size: 16px;
-    padding: 12px 20px;
-    border-radius: 4px;
-    border: 2px solid transparent;
-    cursor: pointer;
-    min-height: 44px;
-  }
-  
-  .btn-primary {
-    background: #1a3c8e;
-    color: #fff;
-  }
-  .btn-primary:hover {
-    background: #142e6e;
-  }
-  
-  .btn-secondary {
-    background: #fff;
-    color: #1a3c8e;
-    border-color: #1a3c8e;
-  }
-  .btn-secondary:hover {
-    background: #eef1f8;
-  }
-  
-  .btn-remove {
-    background: #fff;
-    color: #7a1712;
-    border-color: #b3261e;
-    font-size: 14px;
-    padding: 8px 14px;
-    margin-top: 8px;
-  }
-  
-  /* Wider layout once there's room, e.g. Raymond's desktop */
-  @media (min-width: 700px) {
-    .wrap {
-      padding: 24px;
-    }
-    .nav {
-      justify-content: flex-start;
-    }
-  }
+     box-sizing: border-box;
+   }
+   
+   body {
+     font-family: "Poppins", -apple-system, "Segoe UI", Arial, sans-serif;
+     font-size: 16px;
+     line-height: 1.55;
+     color: var(--text-primary);
+     margin: 0;
+     min-height: 100vh;
+     /* Mesh-gradient background, matching the supplied Figma reference.
+        Purely decorative — every text-bearing element (main, fieldset,
+        .save-status, .err, .person-card) sits on a solid white card on
+        top, so this never touches WCAG contrast requirements. */
+     background:
+       radial-gradient(ellipse 55% 45% at 8% 0%, #000000 0%, transparent 60%),
+       radial-gradient(ellipse 65% 55% at 62% 8%, #2366b5 0%, transparent 65%),
+       radial-gradient(ellipse 60% 65% at 28% 52%, #ffffff 0%, transparent 60%),
+       radial-gradient(ellipse 65% 55% at 88% 68%, #ff2929 0%, transparent 65%),
+       radial-gradient(ellipse 60% 50% at 95% 100%, #ffa89f 0%, transparent 60%),
+       linear-gradient(135deg, #2366b5 0%, #3e56d3 100%);
+     background-attachment: fixed;
+   }
+   
+   .skip-link {
+     position: absolute;
+     left: -999px;
+     top: 0;
+     background: var(--black);
+     color: var(--white);
+     padding: 10px 16px;
+     border-radius: 8px;
+     z-index: 100;
+   }
+   .skip-link:focus {
+     left: 8px;
+     top: 8px;
+   }
+   
+   /* Header: a compact version of the same mesh, but the gradient stops
+      are chosen so white header text only ever sits over black or blue
+      (both pass 4.5:1+) — red/coral appear only as the bottom accent
+      stripe, never behind text. */
+   .hdr {
+     background: linear-gradient(120deg, #000000 0%, #2366b5 60%, #b42318 100%);
+     color: var(--white);
+     padding: 16px 20px;
+     position: relative;
+   }
+   .hdr::after {
+     content: "";
+     position: absolute;
+     left: 0;
+     right: 0;
+     bottom: 0;
+     height: 4px;
+     background: linear-gradient(90deg, #2366b5, #ff2929, #ffa89f);
+   }
+   .hdr .org {
+     margin: 0;
+     font-size: 16px;
+     font-weight: 600;
+   }
+   
+   .wrap {
+     max-width: 640px;
+     margin: 0 auto;
+     padding: 20px 16px 60px;
+   }
+   
+   .step {
+     color: #fff;
+     font-size: 13px;
+     font-weight: 600;
+     letter-spacing: 0.03em;
+     text-transform: uppercase;
+     margin: 16px 0 10px;
+     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+   }
+   
+   .save-status,
+   .err,
+   main,
+   fieldset,
+   .person-card {
+     background: #fff;
+     border: 1px solid rgba(16, 24, 40, 0.1);
+     border-radius: var(--radius-lg);
+     box-shadow: var(--shadow-md);
+   }
+   
+   main {
+     padding: 24px 20px;
+     margin-bottom: 20px;
+   }
+   
+   .save-status {
+     background: #f2f3e6;
+     color: var(--success);
+     font-size: 14px;
+     padding: 12px 16px;
+     margin-bottom: 16px;
+     border-left: 4px solid var(--success);
+   }
+   
+   .err {
+     background: #fdf0ef;
+     border: 2px solid var(--red-text);
+     border-left: 6px solid var(--red-text);
+     padding: 14px 18px;
+     margin-bottom: 20px;
+   }
+   .err-title {
+     font-weight: 700;
+     margin: 0 0 8px;
+     color: var(--red-text);
+   }
+   .err ul {
+     margin: 0;
+     padding-left: 20px;
+   }
+   .err a {
+     color: var(--red-text);
+     text-decoration: underline;
+     font-weight: 600;
+   }
+   
+   .q {
+     margin: 20px 0;
+   }
+   
+   label {
+     display: block;
+     font-weight: 600;
+     margin-bottom: 4px;
+     color: var(--text-primary);
+   }
+   
+   .hint {
+     color: var(--text-secondary);
+     font-size: 14px;
+     margin: 4px 0 8px;
+   }
+   
+   /* The footer disclaimer ("Form HSP-1. Fields marked * are required.")
+      is legally meaningful, not a passing field hint — darker and a bit
+      heavier so it doesn't read as decorative fine print. */
+   hr + .hint {
+     color: var(--text-primary);
+     font-weight: 500;
+   }
+   
+   .req {
+     color: var(--red-text);
+   }
+   
+   input[type="text"],
+   input[type="date"],
+   input[type="email"],
+   input[type="tel"],
+   input[type="number"],
+   select {
+     width: 100%;
+     max-width: 100%;
+     font-family: inherit;
+     font-size: 16px;
+     padding: 11px 14px;
+     border: 1.5px solid #d0d5dd;
+     border-radius: 10px;
+     background: #fff;
+     color: var(--text-primary);
+     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+   }
+   
+   input:focus,
+   select:focus,
+   button:focus,
+   a:focus {
+     outline: none;
+   }
+   input:focus-visible,
+   select:focus-visible,
+   button:focus-visible,
+   a:focus-visible {
+     outline: 3px solid var(--black);
+     outline-offset: 2px;
+     box-shadow: 0 0 0 5px rgba(35, 102, 181, 0.35);
+   }
+   
+   fieldset {
+     padding: 16px 18px 20px;
+     margin: 20px 0;
+   }
+   fieldset.person-card {
+     border: 1.5px solid var(--blue);
+     background: #eef4fb;
+   }
+   legend {
+     font-weight: 600;
+     padding: 0 8px;
+     color: var(--text-primary);
+   }
+   
+   .radio-label,
+   .checkbox-label {
+     font-weight: 400;
+     margin: 8px 0;
+     min-height: 44px;
+     display: flex;
+     align-items: center;
+     gap: 10px;
+   }
+   .radio-label input,
+   .checkbox-label input {
+     width: 20px;
+     height: 20px;
+     flex-shrink: 0;
+   }
+   
+   .nav {
+     display: flex;
+     gap: 12px;
+     margin-top: 28px;
+     flex-wrap: wrap;
+   }
+   
+   .btn {
+     font-family: inherit;
+     font-size: 16px;
+     padding: 12px 22px;
+     border-radius: 10px;
+     border: none;
+     cursor: pointer;
+     min-height: 44px;
+     font-weight: 600;
+     transition: filter var(--transition-fast), transform var(--transition-fast);
+   }
+   .btn:hover {
+     filter: brightness(1.1);
+   }
+   .btn:active {
+     transform: translateY(1px);
+   }
+   
+   /* Blue, not the bright red/coral — 5.77:1 with white text, clears
+      WCAG AA. */
+   .btn-primary {
+     background: var(--blue);
+     color: var(--white);
+   }
+   
+   .btn-secondary {
+     background: #fff;
+     color: var(--text-primary);
+     border: 1.5px solid var(--black);
+   }
+   .btn-secondary:hover {
+     background: #f2f4f8;
+   }
+   
+   .btn-remove {
+     background: #fff;
+     color: var(--red-text);
+     border: 1.5px solid var(--red-text);
+     font-size: 14px;
+     padding: 8px 14px;
+     margin-top: 8px;
+   }
+   
+   /* Coral used here as a background only because it's paired with dark
+      text (10:1+), not white — this is where the brightest palette
+      colors are safe to use directly. */
+   .badge {
+     display: inline-flex;
+     align-items: center;
+     gap: 4px;
+     padding: 3px 10px;
+     border-radius: 999px;
+     font-size: 12px;
+     font-weight: 700;
+     background: var(--coral);
+     color: var(--text-primary);
+   }
+   
+   @media (min-width: 700px) {
+     .wrap {
+       padding: 32px 24px 60px;
+     }
+     .nav {
+       justify-content: flex-start;
+     }
+   }
+   
+   @media (prefers-reduced-motion: reduce) {
+     * {
+       transition-duration: 0.01ms !important;
+     }
+   }
+   
+   @media (prefers-contrast: high) {
+     .save-status,
+     .err,
+     main,
+     fieldset,
+     .person-card {
+       border: 2px solid #000;
+     }
+     input:focus-visible,
+     select:focus-visible,
+     button:focus-visible,
+     a:focus-visible {
+       outline: 4px solid #000;
+       box-shadow: none;
+     }
+   }
+   
+   @media print {
+     body {
+       background: #fff;
+     }
+     .hdr {
+       background: #000;
+     }
+     .save-status,
+     .err,
+     main,
+     fieldset,
+     .person-card {
+       box-shadow: none;
+       border: 1px solid #ccc;
+     }
+   }
