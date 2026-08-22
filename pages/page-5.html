@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Household Support Application — Step 4 of 4: Savings and property</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to form</a>
+
+<header class="hdr">
+  <p class="org">Calder County — Department of Household Services</p>
+</header>
+
+<div class="wrap">
+  <p class="step">Step 4 of 4 — Savings and property</p>
+
+  <p class="save-status" id="saveStatus" role="status" aria-live="polite">
+    Your answers are saved automatically on this device as you go.
+  </p>
+
+  <div id="errorSummary" class="err" tabindex="-1" role="alert" hidden>
+    <p class="err-title">There's a problem</p>
+    <ul id="errorList"></ul>
+  </div>
+
+  <main id="main">
+    <form id="page5Form" novalidate>
+
+      <div class="q">
+        <p class="hint">
+          Tell us what savings, property, or other assets your household
+          has. You don't need to include the home you live in, or
+          everyday personal belongings.
+        </p>
+      </div>
+
+      <div class="q">
+        <label for="cash_current">Money in current accounts <span class="req" aria-hidden="true">*</span></label>
+        <p class="hint" id="cash_current_hint">Total across all current accounts held by anyone in your household.</p>
+        <input type="text" id="cash_current" name="cash_current" inputmode="decimal" aria-required="true" aria-describedby="cash_current_hint">
+      </div>
+
+      <div class="q">
+        <label for="cash_savings">Money in savings accounts (optional)</label>
+        <input type="text" id="cash_savings" name="cash_savings" inputmode="decimal">
+      </div>
+
+      <div class="q">
+        <label for="cash_fixed">Money in fixed-term deposits or bonds (optional)</label>
+        <input type="text" id="cash_fixed" name="cash_fixed" inputmode="decimal">
+      </div>
+
+      <div class="q">
+        <label for="investments">Stocks, shares, or investment funds (optional)</label>
+        <p class="hint" id="inv_hint">Use their current market value.</p>
+        <input type="text" id="investments" name="investments" inputmode="decimal" aria-describedby="inv_hint">
+      </div>
+
+      <div class="q">
+        <label for="life_sv">Cash-in value of any life insurance policy (optional)</label>
+        <input type="text" id="life_sv" name="life_sv" inputmode="decimal">
+      </div>
+
+      <div class="q">
+        <label for="property">Any property you own other than the home you live in (optional)</label>
+        <input type="text" id="property" name="property" inputmode="decimal">
+      </div>
+
+      <div class="q">
+        <label for="vehicles">Value of vehicles beyond the one your household regularly uses (optional)</label>
+        <p class="hint" id="veh_hint">Your main vehicle doesn't count — only extra vehicles beyond that one.</p>
+        <input type="text" id="vehicles" name="vehicles" inputmode="decimal" aria-describedby="veh_hint">
+      </div>
+
+      <div class="q">
+        <label for="joint">Money or property you own jointly with someone outside your household (optional)</label>
+        <input type="text" id="joint" name="joint" inputmode="decimal">
+      </div>
+
+      <div class="q">
+        <label for="joint_pct">Your share of that, as a percentage (optional unless you answered the question above)</label>
+        <input type="text" id="joint_pct" name="joint_pct" inputmode="numeric" placeholder="e.g. 50">
+      </div>
+
+      <fieldset class="q">
+        <legend>Have you given away or sold any savings, property, or other asset in the last 6 months?</legend>
+        <label class="radio-label"><input type="radio" name="deprivation" value="Yes"> Yes</label>
+        <label class="radio-label"><input type="radio" name="deprivation" value="No"> No</label>
+      </fieldset>
+
+      <div class="q">
+        <label for="deprivation_detail">If yes, what and for how much (optional unless you answered yes above)</label>
+        <input type="text" id="deprivation_detail" name="deprivation_detail">
+      </div>
+
+      <div class="nav">
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='page-4.html'">Back</button>
+        <button type="submit" class="btn btn-primary">Continue</button>
+      </div>
+    </form>
+  </main>
+
+  <hr>
+  <p class="hint">Form HSP-1. Fields marked <span class="req" aria-hidden="true">*</span> are required.</p>
+</div>
+
+<script src="../storage.js"></script>
+<script>
+  autoSavePage("page-5");
+
+  document.getElementById("page5Form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const errors = [];
+    const summary = document.getElementById("errorSummary");
+    const list = document.getElementById("errorList");
+    list.innerHTML = "";
+
+    const cashCurrent = document.getElementById("cash_current");
+    if (!cashCurrent.value) errors.push({ id: "cash_current", msg: "Enter your current account balance, or 0 if none" });
+    if (!document.querySelector('[name="deprivation"]:checked')) {
+      errors.push({ id: null, msg: "Answer whether you've given away or sold any asset in the last 6 months" });
+    }
+
+    if (errors.length > 0) {
+      errors.forEach((err) => {
+        const li = document.createElement("li");
+        if (err.id) {
+          const a = document.createElement("a");
+          a.href = `#${err.id}`;
+          a.textContent = err.msg;
+          a.addEventListener("click", (evt) => {
+            evt.preventDefault();
+            document.getElementById(err.id).focus();
+          });
+          li.appendChild(a);
+        } else {
+          li.textContent = err.msg;
+        }
+        list.appendChild(li);
+      });
+      summary.hidden = false;
+      summary.focus();
+    } else {
+      summary.hidden = true;
+      // Original form continues to page-6 (Expenditure), which is out of
+      // scope for this rebuild — the 4 worst pages end here.
+      alert("End of rebuilt flow — pages 6\u20138 are unchanged from the original and out of scope for this rebuild.");
+    }
+  });
+</script>
+</body>
+</html>
