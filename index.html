@@ -56,8 +56,6 @@
 
 <script src="storage.js"></script>
 <script>
-  // If there's saved progress, offer to resume rather than silently
-  // starting fresh — this is the point of save/resume actually paying off.
   const existing = loadApplication();
   const hasProgress = Object.keys(existing).some((k) => k !== "lastSaved" && Object.keys(existing[k]).length > 0);
 

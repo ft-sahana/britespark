@@ -201,7 +201,6 @@
       const noDoc = select.value === "I don't have one of these right now";
       refWrap.hidden = noDoc;
       reasonWrap.hidden = !noDoc;
-      // Data-layer flag for supervisor referral, per directive LS-2026/04.
       saveField("page-3", `hh${n}_id_flagged`, noDoc ? "true" : "false");
     }
     select.addEventListener("change", update);
@@ -228,9 +227,7 @@
     const card = wrapper.firstElementChild;
     personList.appendChild(card);
 
-    // Wire save/resume for just this card's fields — fields added
-    // after the page-level autoSavePage() call need this explicitly,
-    // or they silently never persist.
+    
     wireFieldsIn(card, "page-3");
     wireIdDocToggle(n);
     wireAgeCheck(n);
@@ -247,11 +244,8 @@
     }
   });
 
-  // Wire the static, always-present fields (household change, NRPF,
-  // prior assistance) before any person card exists.
   autoSavePage("page-3");
 
-  // Household-level prior-assistance reveal
   const priorAsstDetail = document.getElementById("priorAsstDetail");
   document.querySelectorAll('[name="prior_asst"]').forEach((radio) => {
     radio.addEventListener("change", () => {
@@ -262,10 +256,7 @@
     priorAsstDetail.hidden = false;
   }
 
-  // Restore however many person cards previously existed, not just
-  // one — otherwise a returning applicant's 2nd, 3rd... person has
-  // saved field values with no card to display them in. Look at
-  // saved keys to find the highest person number that has any data.
+  
   const saved3 = loadPage("page-3");
   let priorCount = 0;
   Object.keys(saved3).forEach((key) => {
@@ -273,8 +264,6 @@
     if (match) priorCount = Math.max(priorCount, parseInt(match[1], 10));
   });
 
-  // Start with one person card visible, since the common case is "at
-  // least one other person" — or restore the previously saved count.
   const initialCount = Math.max(1, priorCount);
   for (let i = 0; i < initialCount; i++) addPerson();
 
@@ -328,11 +317,7 @@
           const a = document.createElement("a");
           a.href = `#${err.id}`;
           a.textContent = err.msg;
-          // No click handler needed — following a fragment link to a
-          // focusable element's id natively moves keyboard focus there
-          // per the HTML spec. A scripted .focus() call here was
-          // actually less reliable under VoiceOver than just letting
-          // the browser do it. Found via manual screen-reader testing.
+          
           li.appendChild(a);
         } else {
           li.textContent = err.msg;
@@ -342,7 +327,6 @@
       document.getElementById("errorCount").textContent =
         `There ${errors.length === 1 ? "is 1 error" : "are " + errors.length + " errors"} below.`;
       summary.hidden = false;
-      // Deferred by one tick — see page-1.html for why.
       setTimeout(() => summary.focus(), 0);
     } else {
       summary.hidden = true;

@@ -149,11 +149,7 @@
           const a = document.createElement("a");
           a.href = `#${err.id}`;
           a.textContent = err.msg;
-          // No click handler needed — following a fragment link to a
-          // focusable element's id natively moves keyboard focus there
-          // per the HTML spec. A scripted .focus() call here was
-          // actually less reliable under VoiceOver than just letting
-          // the browser do it. Found via manual screen-reader testing.
+          
           li.appendChild(a);
         } else {
           li.textContent = err.msg;
@@ -163,7 +159,6 @@
       document.getElementById("errorCount").textContent =
         `There ${errors.length === 1 ? "is 1 error" : "are " + errors.length + " errors"} below.`;
       summary.hidden = false;
-      // Deferred by one tick — see page-1.html for why.
       setTimeout(() => summary.focus(), 0);
     } else {
       summary.hidden = true;
