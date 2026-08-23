@@ -259,8 +259,21 @@
     priorAsstDetail.hidden = false;
   }
 
-  // Start with one person card visible, since the common case is "at least one other person"
-  addPerson();
+  // Restore however many person cards previously existed, not just
+  // one — otherwise a returning applicant's 2nd, 3rd... person has
+  // saved field values with no card to display them in. Look at
+  // saved keys to find the highest person number that has any data.
+  const saved3 = loadPage("page-3");
+  let priorCount = 0;
+  Object.keys(saved3).forEach((key) => {
+    const match = key.match(/^hh(\d+)_/);
+    if (match) priorCount = Math.max(priorCount, parseInt(match[1], 10));
+  });
+
+  // Start with one person card visible, since the common case is "at
+  // least one other person" — or restore the previously saved count.
+  const initialCount = Math.max(1, priorCount);
+  for (let i = 0; i < initialCount; i++) addPerson();
 
   document.getElementById("page3Form").addEventListener("submit", function (e) {
     e.preventDefault();
