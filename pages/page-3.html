@@ -200,6 +200,8 @@
       const noDoc = select.value === "I don't have one of these right now";
       refWrap.hidden = noDoc;
       reasonWrap.hidden = !noDoc;
+      // Data-layer flag for supervisor referral, per directive LS-2026/04.
+      saveField("page-3", `hh${n}_id_flagged`, noDoc ? "true" : "false");
     }
     select.addEventListener("change", update);
     update();

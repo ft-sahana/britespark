@@ -151,6 +151,9 @@
     const noDoc = idDocType.value === "I don't have one of these right now";
     refWrap.hidden = noDoc;
     reasonWrap.hidden = !noDoc;
+    // Data-layer flag for supervisor referral, per directive LS-2026/04.
+    // Not shown to the applicant — this is a caseworker-facing signal.
+    saveField("page-1", "id_flagged", noDoc ? "true" : "false");
   }
   idDocType.addEventListener("change", updateIdDocFields);
   updateIdDocFields(); // in case a saved value is restored on page load
