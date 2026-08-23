@@ -20,8 +20,9 @@
     Your answers are saved automatically on this device as you go.
   </p>
 
-  <div id="errorSummary" class="err" tabindex="-1" role="alert" hidden>
-    <p class="err-title">There's a problem</p>
+  <div id="errorSummary" class="err" tabindex="-1" role="region" aria-labelledby="errorSummaryTitle" hidden>
+    <p class="err-title" id="errorSummaryTitle">There's a problem</p>
+    <p id="errorCount" class="sr-only" aria-live="assertive"></p>
     <ul id="errorList"></ul>
   </div>
 
@@ -190,18 +191,25 @@
           const a = document.createElement("a");
           a.href = `#${err.id}`;
           a.textContent = err.msg;
-          a.addEventListener("click", (evt) => {
-            evt.preventDefault();
-            document.getElementById(err.id).focus();
-          });
+          // No click handler needed — following a fragment link to a
+          // focusable element's id natively moves keyboard focus there
+          // per the HTML spec. A scripted .focus() call here was
+          // actually less reliable under VoiceOver than just letting
+          // the browser do it. Found via manual screen-reader testing.
           li.appendChild(a);
         } else {
           li.textContent = err.msg;
         }
         list.appendChild(li);
       });
+      document.getElementById("errorCount").textContent =
+        `There ${errors.length === 1 ? "is 1 error" : "are " + errors.length + " errors"} below.`;
       summary.hidden = false;
-      summary.focus();
+      // Defer focus by one tick: setting hidden=false and calling
+      // .focus() in the same synchronous step can fire before Safari's
+      // accessibility tree has caught up, so VoiceOver never announces
+      // it. Found via manual VoiceOver testing.
+      setTimeout(() => summary.focus(), 0);
     } else {
       summary.hidden = true;
       window.location.href = "page-3.html";

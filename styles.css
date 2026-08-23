@@ -185,6 +185,21 @@
      color: var(--red-text);
    }
    
+   /* Visually hidden but still readable by screen readers — for the
+      immediate error-count announcement that isn't meant to take up
+      visible space. */
+   .sr-only {
+     position: absolute;
+     width: 1px;
+     height: 1px;
+     padding: 0;
+     margin: -1px;
+     overflow: hidden;
+     clip: rect(0, 0, 0, 0);
+     white-space: nowrap;
+     border: 0;
+   }
+   
    input[type="text"],
    input[type="date"],
    input[type="email"],
