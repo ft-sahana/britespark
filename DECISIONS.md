@@ -18,6 +18,8 @@ problems. Still to do — testing with an actual screen reader (NVDA or
 VoiceOver) rather than only the automated checker, since that's where
 issues like confusing focus order or unclear reading order actually
 surface.
+Update: completed — see "Manual screen-reader testing" further down,
+which found three real issues pa11y's automated scan missed entirely.
 
 #### Day-two change: Legal Services directive LS-2026/04
 
