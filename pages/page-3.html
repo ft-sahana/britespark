@@ -20,9 +20,6 @@
     Your answers are saved automatically on this device as you go.
   </p>
 
-  <!-- Error summary: hidden until there are errors, then gets focus so a
-       screen reader announces it immediately, and links jump straight to
-       the broken field. This replaces the original's disconnected banner. -->
   <div id="errorSummary" class="err" tabindex="-1" role="alert" hidden>
     <p class="err-title">There's a problem</p>
     <ul id="errorList"></ul>
@@ -66,6 +63,29 @@
         <label class="radio-label"><input type="radio" name="nrpf" value="Do not know"> Don't know</label>
       </fieldset>
 
+      <fieldset class="q">
+        <legend>Has anyone in your household received similar assistance from another county or state in the last 24 months? <span class="req" aria-hidden="true">*</span></legend>
+        <p class="hint">Required — per Legal Services directive LS-2026/04. Choose "Don't know" if you're not sure what someone else in your household has claimed elsewhere.</p>
+        <label class="radio-label"><input type="radio" name="prior_asst" value="Yes" aria-required="true"> Yes</label>
+        <label class="radio-label"><input type="radio" name="prior_asst" value="No"> No</label>
+        <label class="radio-label"><input type="radio" name="prior_asst" value="Do not know"> Don't know</label>
+      </fieldset>
+
+      <div id="priorAsstDetail" hidden>
+        <div class="q">
+          <label for="prior_asst_jurisdiction">Which county or state? <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="prior_asst_jurisdiction" name="prior_asst_jurisdiction">
+        </div>
+        <div class="q">
+          <label for="prior_asst_program">Program name, if you know it (optional)</label>
+          <input type="text" id="prior_asst_program" name="prior_asst_program">
+        </div>
+        <div class="q">
+          <label for="prior_asst_dates">Approximate dates, if you know them (optional)</label>
+          <input type="text" id="prior_asst_dates" name="prior_asst_dates" placeholder="e.g. early 2025">
+        </div>
+      </div>
+
       <div class="nav">
         <button type="button" class="btn btn-secondary" onclick="window.location.href='page-1.html'">Back</button>
         <button type="submit" class="btn btn-primary">Continue</button>
@@ -83,7 +103,10 @@
   const personList = document.getElementById("personList");
   let personCount = 0;
 
+  const ID_DOC_OPTIONS = ["State ID", "Passport", "Permanent resident card", "Tribal ID", "Other", "I don't have one of these right now"];
+
   function personCardHTML(n) {
+    const idOptions = ID_DOC_OPTIONS.map((o) => `<option>${o}</option>`).join("");
     return `
       <fieldset class="person-card" data-person="${n}">
         <legend>Person ${n}</legend>
@@ -128,17 +151,87 @@
           </label>
         </fieldset>
 
+        <div class="q" id="hh${n}_id_wrap" hidden>
+          <p class="hint">Person ${n} is 16 or older, so we also need to verify their identity — per Legal Services directive LS-2026/04.</p>
+
+          <div class="q">
+            <label for="hh${n}_id_doc_type">Type of ID for Person ${n}</label>
+            <select id="hh${n}_id_doc_type" name="hh${n}_id_doc_type">
+              <option value="">Choose one</option>
+              ${idOptions}
+            </select>
+          </div>
+
+          <div class="q" id="hh${n}_id_doc_ref_wrap">
+            <label for="hh${n}_id_doc_ref">Document reference number</label>
+            <input type="text" id="hh${n}_id_doc_ref" name="hh${n}_id_doc_ref">
+          </div>
+
+          <div class="q" id="hh${n}_id_doc_reason_wrap" hidden>
+            <label for="hh${n}_id_doc_reason">Tell us why this document isn't available</label>
+            <p class="hint">This won't stop your application — we may follow up about it.</p>
+            <textarea id="hh${n}_id_doc_reason" name="hh${n}_id_doc_reason" rows="2"></textarea>
+          </div>
+        </div>
+
         <button type="button" class="btn btn-remove" data-remove="${n}">Remove this person</button>
       </fieldset>
     `;
   }
 
+  function ageFromDob(dobStr) {
+    if (!dobStr) return null;
+    const dob = new Date(dobStr);
+    if (isNaN(dob.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const hadBirthdayThisYear =
+      today.getMonth() > dob.getMonth() ||
+      (today.getMonth() === dob.getMonth() && today.getDate() >= dob.getDate());
+    if (!hadBirthdayThisYear) age--;
+    return age;
+  }
+
+  function wireIdDocToggle(n) {
+    const select = document.getElementById(`hh${n}_id_doc_type`);
+    const refWrap = document.getElementById(`hh${n}_id_doc_ref_wrap`);
+    const reasonWrap = document.getElementById(`hh${n}_id_doc_reason_wrap`);
+    function update() {
+      const noDoc = select.value === "I don't have one of these right now";
+      refWrap.hidden = noDoc;
+      reasonWrap.hidden = !noDoc;
+    }
+    select.addEventListener("change", update);
+    update();
+  }
+
+  function wireAgeCheck(n) {
+    const dob = document.getElementById(`hh${n}_dob`);
+    const idWrap = document.getElementById(`hh${n}_id_wrap`);
+    function update() {
+      const age = ageFromDob(dob.value);
+      idWrap.hidden = age === null || age < 16;
+    }
+    dob.addEventListener("change", update);
+    update();
+  }
+
   function addPerson() {
     if (personCount >= MAX_PEOPLE) return;
     personCount++;
+    const n = personCount;
     const wrapper = document.createElement("div");
-    wrapper.innerHTML = personCardHTML(personCount);
-    personList.appendChild(wrapper.firstElementChild);
+    wrapper.innerHTML = personCardHTML(n);
+    const card = wrapper.firstElementChild;
+    personList.appendChild(card);
+
+    // Wire save/resume for just this card's fields — fields added
+    // after the page-level autoSavePage() call need this explicitly,
+    // or they silently never persist.
+    wireFieldsIn(card, "page-3");
+    wireIdDocToggle(n);
+    wireAgeCheck(n);
+
     document.getElementById("addPerson").disabled = personCount >= MAX_PEOPLE;
   }
 
@@ -151,11 +244,23 @@
     }
   });
 
+  // Wire the static, always-present fields (household change, NRPF,
+  // prior assistance) before any person card exists.
+  autoSavePage("page-3");
+
+  // Household-level prior-assistance reveal
+  const priorAsstDetail = document.getElementById("priorAsstDetail");
+  document.querySelectorAll('[name="prior_asst"]').forEach((radio) => {
+    radio.addEventListener("change", () => {
+      priorAsstDetail.hidden = radio.value !== "Yes" || !radio.checked;
+    });
+  });
+  if (document.querySelector('[name="prior_asst"]:checked')?.value === "Yes") {
+    priorAsstDetail.hidden = false;
+  }
+
   // Start with one person card visible, since the common case is "at least one other person"
   addPerson();
-
-  // Restore save/resume after the dynamic person cards exist
-  autoSavePage("page-3");
 
   document.getElementById("page3Form").addEventListener("submit", function (e) {
     e.preventDefault();
@@ -172,10 +277,32 @@
       if (!name.value) errors.push({ id: name.id, msg: `Person ${n}: enter their full name` });
       if (!dob.value) errors.push({ id: dob.id, msg: `Person ${n}: enter their date of birth` });
       if (!rel.value) errors.push({ id: rel.id, msg: `Person ${n}: choose a relationship` });
+
+      const idWrap = document.getElementById(`hh${n}_id_wrap`);
+      if (idWrap && !idWrap.hidden) {
+        const docType = document.getElementById(`hh${n}_id_doc_type`);
+        if (!docType.value) {
+          errors.push({ id: docType.id, msg: `Person ${n}: choose a type of ID` });
+        } else if (docType.value === "I don't have one of these right now") {
+          const reason = document.getElementById(`hh${n}_id_doc_reason`);
+          if (!reason.value) errors.push({ id: reason.id, msg: `Person ${n}: tell us why an ID isn't available` });
+        } else {
+          const ref = document.getElementById(`hh${n}_id_doc_ref`);
+          if (!ref.value) errors.push({ id: ref.id, msg: `Person ${n}: enter the document reference number` });
+        }
+      }
     });
 
     if (!document.querySelector('[name="hh_change"]:checked')) {
       errors.push({ id: null, msg: "Answer whether anyone has moved in or out in the last 12 months" });
+    }
+
+    const priorAsst = document.querySelector('[name="prior_asst"]:checked');
+    if (!priorAsst) {
+      errors.push({ id: null, msg: "Answer whether anyone in your household has received similar assistance elsewhere" });
+    } else if (priorAsst.value === "Yes") {
+      const jurisdiction = document.getElementById("prior_asst_jurisdiction");
+      if (!jurisdiction.value) errors.push({ id: "prior_asst_jurisdiction", msg: "Enter which county or state" });
     }
 
     if (errors.length > 0) {

@@ -18,3 +18,25 @@ problems. Still to do — testing with an actual screen reader (NVDA or
 VoiceOver) rather than only the automated checker, since that's where
 issues like confusing focus order or unclear reading order actually
 surface.
+
+#### Day-two change: Legal Services directive LS-2026/04
+
+Added two mandatory fields: ID verification (applicant + household
+members 16+) and prior assistance elsewhere (household-level, last 24
+months). Real constraint: any drop in HSP-1's 21.8% completion rate
+counts as failed implementation, not an acceptable tradeoff.
+
+- Applicant ID on page-1, household ID + prior-assistance question on
+  page-3, extending the existing per-person field structure.
+- Reversed an earlier decision to avoid conditional show/hide: ID
+  fields now appear only once a person's DOB shows 16+, so children
+  never see them and the worst-abandonment page doesn't get longer for
+  no reason. Content stays in normal DOM order, no focus stolen.
+- Only jurisdiction is required for prior assistance; program name and
+  dates stay optional — forcing exact recall of someone else's claim
+  risks blocking completion over the hardest-to-answer detail.
+- Found and fixed a real bug while wiring this: dynamically added
+  person cards on page-3 weren't wired for save/resume at all, so
+  Person 2+ was silently not saving. Refactored storage.js to fix it.
+- Not implemented: backend routing for "supervisor referral" — no
+  backend exists in this rebuild, only the reason is captured.

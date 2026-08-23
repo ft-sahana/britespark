@@ -20,6 +20,11 @@
     Your answers are saved automatically on this device as you go.
   </p>
 
+  <div id="errorSummary" class="err" tabindex="-1" role="alert" hidden>
+    <p class="err-title">There's a problem</p>
+    <ul id="errorList"></ul>
+  </div>
+
   <main id="main">
     <form id="page1Form" novalidate>
 
@@ -57,6 +62,37 @@
         <label for="ssn">Social Security number <span class="req" aria-hidden="true">*</span></label>
         <input type="text" id="ssn" name="ssn" aria-required="true" autocomplete="off">
       </div>
+
+      <fieldset class="q">
+        <legend>Proof of identity <span class="req" aria-hidden="true">*</span></legend>
+        <p class="hint">Required for everyone applying, per Legal Services directive LS-2026/04.</p>
+
+        <div class="q">
+          <label for="id_doc_type">Type of ID you're using</label>
+          <select id="id_doc_type" name="id_doc_type" aria-required="true">
+            <option value="">Choose one</option>
+            <option>State ID</option>
+            <option>Passport</option>
+            <option>Permanent resident card</option>
+            <option>Tribal ID</option>
+            <option>Other</option>
+            <option>I don't have one of these right now</option>
+          </select>
+        </div>
+
+        <div class="q" id="id_doc_ref_wrap">
+          <label for="id_doc_ref">Document reference number</label>
+          <input type="text" id="id_doc_ref" name="id_doc_ref">
+        </div>
+
+        <div class="q" id="id_doc_reason_wrap" hidden>
+          <label for="id_doc_reason">Tell us why you don't have this available</label>
+          <p class="hint">
+            This won't stop your application — we may follow up with you about it.
+          </p>
+          <textarea id="id_doc_reason" name="id_doc_reason" rows="2"></textarea>
+        </div>
+      </fieldset>
 
       <fieldset class="q">
         <legend>Sex as recorded on your ID document <span class="req" aria-hidden="true">*</span></legend>
@@ -103,19 +139,68 @@
 <script>
   autoSavePage("page-1");
 
+  // Reveal the "no document" reason field in place of the reference
+  // number field, based on what's selected — content stays in normal
+  // DOM order (no focus is moved), so a screen reader user tabbing
+  // forward reaches it naturally right after the select.
+  const idDocType = document.getElementById("id_doc_type");
+  const refWrap = document.getElementById("id_doc_ref_wrap");
+  const reasonWrap = document.getElementById("id_doc_reason_wrap");
+
+  function updateIdDocFields() {
+    const noDoc = idDocType.value === "I don't have one of these right now";
+    refWrap.hidden = noDoc;
+    reasonWrap.hidden = !noDoc;
+  }
+  idDocType.addEventListener("change", updateIdDocFields);
+  updateIdDocFields(); // in case a saved value is restored on page load
+
   document.getElementById("page1Form").addEventListener("submit", function (e) {
     e.preventDefault();
-    // Minimal required-field check for now — full accessible error handling
-    // (focus move + linked messages) comes with the household/income pages.
-    const required = ["surname", "forenames", "dob", "ssn", "sex"];
-    const missing = required.filter((name) => {
+    const errors = [];
+    const summary = document.getElementById("errorSummary");
+    const list = document.getElementById("errorList");
+    list.innerHTML = "";
+
+    const required = ["surname", "forenames", "dob", "ssn", "sex", "id_doc_type"];
+    required.forEach((name) => {
       const field = document.querySelector(`[name="${name}"]`);
-      if (field.type === "radio") {
-        return !document.querySelector(`[name="${name}"]:checked`);
+      const isRadio = field.type === "radio";
+      const empty = isRadio ? !document.querySelector(`[name="${name}"]:checked`) : !field.value;
+      if (empty) {
+        errors.push({ id: isRadio ? null : field.id, msg: `Answer the "${field.labels?.[0]?.textContent.replace("*", "").trim() || name}" question` });
       }
-      return !field.value;
     });
-    if (missing.length === 0) {
+
+    if (idDocType.value === "I don't have one of these right now") {
+      const reason = document.getElementById("id_doc_reason");
+      if (!reason.value) errors.push({ id: "id_doc_reason", msg: "Tell us why you don't have an ID document available" });
+    } else if (idDocType.value) {
+      const ref = document.getElementById("id_doc_ref");
+      if (!ref.value) errors.push({ id: "id_doc_ref", msg: "Enter the document reference number" });
+    }
+
+    if (errors.length > 0) {
+      errors.forEach((err) => {
+        const li = document.createElement("li");
+        if (err.id) {
+          const a = document.createElement("a");
+          a.href = `#${err.id}`;
+          a.textContent = err.msg;
+          a.addEventListener("click", (evt) => {
+            evt.preventDefault();
+            document.getElementById(err.id).focus();
+          });
+          li.appendChild(a);
+        } else {
+          li.textContent = err.msg;
+        }
+        list.appendChild(li);
+      });
+      summary.hidden = false;
+      summary.focus();
+    } else {
+      summary.hidden = true;
       window.location.href = "page-3.html";
     }
   });
