@@ -1,0 +1,10 @@
+Tool: pa11y 9.1.1
+URL: http://127.0.0.1:5500/pages/page-4.html
+Timestamp: Sun Sep 13 11:34:08 UTC 2026
+
+Welcome to Pa11y
+
+ > Running Pa11y on URL http://127.0.0.1:5500/pages/page-4.html
+
+No issues found!
+
