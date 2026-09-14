@@ -167,7 +167,13 @@
       const isRadio = field.type === "radio";
       const empty = isRadio ? !document.querySelector(`[name="${name}"]:checked`) : !field.value;
       if (empty) {
-        errors.push({ id: isRadio ? null : field.id, msg: `Answer the "${field.labels?.[0]?.textContent.replace("*", "").trim() || name}" question` });
+        let label;
+        if (isRadio) {
+          label = field.closest("fieldset")?.querySelector("legend")?.textContent.replace("*", "").trim() || name;
+        } else {
+          label = field.labels?.[0]?.textContent.replace("*", "").trim() || name;
+        }
+        errors.push({ id: isRadio ? null : field.id, msg: `Answer the "${label}" question` });
       }
     });
 
